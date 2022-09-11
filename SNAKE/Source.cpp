@@ -2,304 +2,156 @@
 #include <iostream>
 #include <vector>
 #include <ctime>
+#include <string>
 
-#define BLOCK 20
-#define X 1340
-#define Y 760
+#define CellSize 20
+#define Width 1200
+#define Height 760
 
-bool PlayGame = true;
+bool gameState = true;
 
-using namespace sf;
-
-enum NAPRAVLENIE
+//All direction where player can move
+enum Direction
 {
-	UP,
-	DOWN,
-	LEFT,
-	RIGHT
+	Up,
+	Down,
+	Left,
+	Right
 };
-class block
+
+struct Vector2
+{
+private:
+	float x, y;
+public:
+	Vector2(float x, float y) { this->x = x; this->y = y; }
+	//getters
+	Vector2 getVector2() { return Vector2(x, y); }
+	float getX() { return x; }
+	float getY() { return y; }
+	//setters
+	void setVector2(Vector2 newPosition) { x = newPosition.getX(); y = newPosition.getY(); }	
+	void setX(float x) { this->x = x; }
+	void setY(float y) { this->y = y; }
+
+	//todo:
+	//operator overloading
+};
+struct Object
+{
+protected:
+	Vector2 position = Vector2(0,0);
+
+public:
+	virtual void movePosition(Vector2 newPosition) { position = newPosition; }
+	virtual Vector2 getPosition() { return position; }
+};
+
+struct SnakeBodyPart : public Object
 {
 public:
-	RectangleShape shape;
-	int x, y;
-	NAPRAVLENIE to;
+	sf::RectangleShape shape;
 
-	block()
+	SnakeBodyPart()
 	{
-		to = LEFT;		
-		shape.setSize(Vector2f(BLOCK, BLOCK));
-		shape.setFillColor(Color::Green);
-		x = BLOCK * 10;
-		y = BLOCK * 10;
-		shape.setPosition(x, y);
+		shape.setSize(sf::Vector2f(CellSize, CellSize));
+		shape.setFillColor(sf::Color::Green);
+		shape.setPosition(position.getX(), position.getY());
+	}
+	void movePosition(Vector2 step)
+	{		
+		position.setVector2(Vector2(position.getX() + step.getX(), 
+			position.getY() + step.getY()));
+
+		if (position.getX() > Width) position.setX(0);
+		else if (position.getX() < 0) position.setX(Width);
+		if (position.getY() > Height) position.setY(0);
+		else if (position.getY() < 0) position.setY(Height);
+
+		shape.setPosition(position.getX(), position.getY());
+	}
+	void setPosition(Vector2 newPosition)
+	{
+		position.setVector2(newPosition);
+		if (position.getX() > Width) position.setX(0);
+		else if (position.getX() < 0) position.setX(Width);
+		if (position.getY() > Height) position.setY(0);
+		else if (position.getY() < 0) position.setY(Height);
+		shape.setPosition(position.getX(), position.getY());
 	}
 };
-class Snake
+class Snake : public Object
 {
+	std::vector<SnakeBodyPart> body;
+	Direction currentDirection;
 public:
-	int size = 2;
-	int snake_size = 3;
-	std::vector<block> body;
-	NAPRAVLENIE old_to;
-
 	Snake()
 	{
-		body.resize(3);
+		currentDirection = Up;
+		SnakeBodyPart head;
+		head.shape.setFillColor(sf::Color::Yellow);
+		head.movePosition(Vector2(CellSize*30, CellSize*15));
+		body.push_back(head);
 	}
-	void Move()
+	Vector2 getStep()
 	{
-		for (int i = size; i > 0; i--)
+		switch (currentDirection)
 		{
-			body[i].x = body[i - 1].x;
-			body[i].y = body[i - 1].y;
-			body[i].shape.setPosition(body[i].x, body[i].y);
-		}
-		if (body[0].to == LEFT)
-		{
-			if (old_to == RIGHT)
-			{
-				body[0].x += BLOCK;
-			}
-			else
-			{
-				body[0].x -= BLOCK;
-				old_to = LEFT;
-			}
-		}
-		if (body[0].to == RIGHT)
-		{
-			if (old_to == LEFT)
-			{
-				body[0].x -= BLOCK;
-			}
-			else
-			{
-				body[0].x += BLOCK;
-				old_to = RIGHT;
-			}
-
-		}
-		if (body[0].to == DOWN)
-		{
-			if (old_to == UP)
-			{
-				body[0].y -= BLOCK;
-			}
-			else
-			{
-				body[0].y += BLOCK;
-				old_to = DOWN;
-			}
-		}
-		if (body[0].to == UP)
-		{
-			if (old_to == DOWN)
-			{
-				body[0].y += BLOCK;
-			}
-			else
-			{
-				body[0].y -= BLOCK;
-				old_to = UP;
-			}
-		}
-
-		body[0].shape.setPosition(body[0].x, body[0].y);
-
-		if (body[0].y > Y)
-		{
-			body[0].y = 0;
-		}
-		if (body[0].y < 0)
-		{
-			body[0].y = Y;
-		}
-		if (body[0].x > X)
-		{
-			body[0].x = 0;
-		}
-		if (body[0].x < 0)
-		{
-			body[0].x = X;
-		}
-	}  
-	void isDead()
-	{
-		for (size_t i = 1; i <= size; i++)
-		{
-			if (body[0].x == body[i].x and body[0].y == body[i].y)
-			{
-				PlayGame = false;
-			}
+		case Up:
+			return Vector2(0, CellSize);
+		case Down:
+			return Vector2(0, -CellSize);
+		case Left:
+			return Vector2(-CellSize, 0);
+		case Right:
+			return Vector2(CellSize, 0);
 		}
 	}
-};
-class Apple
-{
-public:
-	int applesEat = 0;
-	int score = 0;
-	bool isYellowApple = false;
-	bool isGreenApple = false;
-	CircleShape shape;
-	int x, y;
+	int getSnakeLength() { return body.size(); }
+	void movePosition(Vector2 newPosition)
+	{
+		//moving all body parts without 0
+		for (int i = getSnakeLength()-1; i > 0; i--)
+			body[i].setPosition(body[i-1].getPosition());
 
-	Apple()
-	{
-		x = 0;
-		y = 0;
-		shape.setRadius(10.f);
-		shape.setFillColor(Color::Red);
+		//moving snake "head"
+		body[0].movePosition(newPosition);
 	}
-	void Spawn()
+	Vector2 getPosition() { return body[0].getPosition(); }
+	void addNewBodyPart()
 	{
-		x = rand() % (X / BLOCK);
-		y = rand() % (Y / BLOCK);
-		x *= BLOCK;
-		y *= BLOCK;
-		shape.setPosition(x, y);
+		SnakeBodyPart newBodyPart;
+		body.push_back(newBodyPart);
+		body[getSnakeLength()-1].movePosition(body[getSnakeLength()-2].getPosition());
 	}
-	bool isEat(RectangleShape snake)
+	void drawSnakeBody(sf::RenderWindow * window) 
 	{
-		Vector2f snake_position = snake.getPosition();
-		int snake_x = snake_position.x;
-		int snake_y = snake_position.y; 
-
-		if (x == snake_x and y == snake_y and isYellowApple == false and isGreenApple == false)
-		{
-			Spawn();
-			applesEat++;
-			score++;
-			return true;
-		}
-		if (x == snake_x and y == snake_y and isYellowApple == true)
-		{
-			score += 2;
-			isYellowApple = false;
-			shape.setFillColor(Color::Red);
-			Spawn();
-		}
-		if (x == snake_x and y == snake_y and isGreenApple == true)
-		{
-			score -= 1;
-			isGreenApple = false;
-			shape.setFillColor(Color::Red);
-			Spawn();
-		}
-		else
-		{
-			return false;
-		}
+		for (size_t i = 0; i < getSnakeLength(); i++)
+			window->draw(body[i].shape);
 	}
 };
 
 int main()
 {
-	srand(time(NULL));
-	Font font;
-	Apple apple;
-	Snake snake;
-	int fps = 5;
-	int a = apple.applesEat;
-	std::string applesEat;
-	font.loadFromFile("font.ttf");
-	Text GameOver("GAME OVER", font, 100);
-	GameOver.setStyle(Text::Bold);
-	GameOver.setOrigin(GameOver.getLocalBounds().width / 2, GameOver.getLocalBounds().height / 2);
-	GameOver.setPosition(X / 2, Y / 2);
-	RenderWindow window(VideoMode(X, Y), "SNAKE");//, Style::Fullscreen);
-	font.loadFromFile("font.ttf");
-	Text text("", font, 70);
-	text.setStyle(Text::Bold);
-	applesEat += std::to_string(a);
-	text.setString(applesEat);
-	text.setPosition(10, 0);
-	window.setFramerateLimit(fps);
-	apple.Spawn();
-	bool isMenu = true;
-
-	while (window.isOpen())
-	{
-		Event event;
-		
-		while (window.pollEvent(event))
-		{
-			if (event.type == Event::KeyPressed && event.key.code == (Keyboard::Escape))
-			{
-				window.close();
-			}
-			if (event.type == Event::KeyPressed && event.key.code == (Keyboard::Down))
-			{
-				snake.body[0].to = DOWN;
-			}
-			if (event.type == Event::KeyPressed && event.key.code == (Keyboard::Up))
-			{
-				snake.body[0].to = UP;
-			}
-			if (event.type == Event::KeyPressed && event.key.code == (Keyboard::Left))
-			{
-				snake.body[0].to = LEFT;
-			}
-			if (event.type == Event::KeyPressed && event.key.code == (Keyboard::Right))
-			{
-				snake.body[0].to = RIGHT;
-			}
-		}
-		if (PlayGame)
-		{
-			a = apple.score;
-			applesEat = "";
-			applesEat += std::to_string(a);
-			text.setString(applesEat);
-			apple.isEat(snake.body[0].shape);
-			window.clear();
-			window.draw(text);
-			window.draw(apple.shape);
-			snake.Move();
-			snake.isDead();
-			for (int i = 0; i <= snake.size; i++)
-			{
-				window.draw(snake.body[i].shape);
-			}
-		}
+	sf::RenderWindow window(sf::VideoMode(Width, Height), "Snake");//, Style::Fullscreen);
+	window.setFramerateLimit(3);
 	
-		if (!PlayGame)
-		{
-			window.draw(GameOver);
-		}
+	Snake snake;
+	snake.addNewBodyPart();
+	snake.addNewBodyPart();
+	snake.addNewBodyPart();
+	std::cout << snake.getSnakeLength();
+
+
+	while (true)
+	{
+		std::cout << "Snake step " << snake.getStep().getX() << " " << snake.getStep().getY() << std::endl;
+		std::cout << "Snake head position " << snake.getPosition().getX() << " " << snake.getPosition().getY() << std::endl;
+		window.clear();
+		snake.drawSnakeBody(&window);
+		snake.movePosition(snake.getStep());
 		window.display();
-		if (PlayGame)
-		{
-			if (apple.isEat(snake.body[0].shape) == true)
-			{
-				int GreenApple = rand() % 5;
-				int YellowApple = rand() % 5;
-				snake.size++;
-				snake.snake_size++;
-				snake.body.push_back(snake.body[0]);
-				snake.body[snake.size].x = snake.body[snake.snake_size - 1].x - BLOCK;
-				snake.body[snake.size].y = snake.body[snake.snake_size - 1].y;
-				snake.body[snake.size].shape.setPosition(snake.body[snake.size].x, snake.body[snake.size].y);
-				if (YellowApple == 1)
-				{
-					apple.shape.setFillColor(Color::Yellow);
-					apple.isYellowApple = true;
-					apple.Spawn();
-				}
-				if (GreenApple == 1)
-				{	
-					apple.isGreenApple = true;
-					apple.shape.setFillColor(Color::Green);
-					apple.Spawn();
-				}
-				if (apple.applesEat % 2 == 0)
-				{
-					fps++;
-					window.setFramerateLimit(fps);
-				}
-			}
-		}
 	}
+
 	return 0;
 }

@@ -1,24 +1,4 @@
 ﻿  Source.cpp
-D:\VS PROJECTS\SnakeCPP\SNAKE\Source.cpp(33,24): warning C4244: аргумент: преобразование "int" в "float", возможна потеря данных
-D:\VS PROJECTS\SnakeCPP\SNAKE\Source.cpp(33,21): warning C4244: аргумент: преобразование "int" в "float", возможна потеря данных
-D:\VS PROJECTS\SnakeCPP\SNAKE\Source.cpp(54,48): warning C4244: аргумент: преобразование "int" в "float", возможна потеря данных
-D:\VS PROJECTS\SnakeCPP\SNAKE\Source.cpp(54,37): warning C4244: аргумент: преобразование "int" в "float", возможна потеря данных
-D:\VS PROJECTS\SnakeCPP\SNAKE\Source.cpp(106,47): warning C4244: аргумент: преобразование "int" в "float", возможна потеря данных
-D:\VS PROJECTS\SnakeCPP\SNAKE\Source.cpp(106,36): warning C4244: аргумент: преобразование "int" в "float", возможна потеря данных
-D:\VS PROJECTS\SnakeCPP\SNAKE\Source.cpp(159,24): warning C4244: аргумент: преобразование "int" в "float", возможна потеря данных
-D:\VS PROJECTS\SnakeCPP\SNAKE\Source.cpp(159,21): warning C4244: аргумент: преобразование "int" в "float", возможна потеря данных
-D:\VS PROJECTS\SnakeCPP\SNAKE\Source.cpp(164,15): warning C4244: инициализация: преобразование "T" в "int", возможна потеря данных
-          with
-          [
-              T=float
-          ]
-D:\VS PROJECTS\SnakeCPP\SNAKE\Source.cpp(165,15): warning C4244: инициализация: преобразование "T" в "int", возможна потеря данных
-          with
-          [
-              T=float
-          ]
-D:\VS PROJECTS\SnakeCPP\SNAKE\Source.cpp(197,12): warning C4244: аргумент: преобразование "time_t" в "unsigned int", возможна потеря данных
-D:\VS PROJECTS\SnakeCPP\SNAKE\Source.cpp(280,94): warning C4244: аргумент: преобразование "int" в "float", возможна потеря данных
-D:\VS PROJECTS\SnakeCPP\SNAKE\Source.cpp(280,68): warning C4244: аргумент: преобразование "int" в "float", возможна потеря данных
-D:\VS PROJECTS\SnakeCPP\SNAKE\Source.cpp(192): warning C4715: Apple::isEat: значение возвращается не при всех путях выполнения
+D:\VS PROJECTS\SnakeCPP\SNAKE\Source.cpp(110,23): warning C4267: return: преобразование из "size_t" в "int"; возможна потеря данных
+D:\VS PROJECTS\SnakeCPP\SNAKE\Source.cpp(109): warning C4715: Snake::getStep: значение возвращается не при всех путях выполнения
   SNAKE.vcxproj -> D:\VS PROJECTS\SnakeCPP\x64\Debug\SNAKE.exe
