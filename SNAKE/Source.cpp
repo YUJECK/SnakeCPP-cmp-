@@ -8,9 +8,7 @@
 #define Width 1200
 #define Height 760
 
-bool gameState = true;
-
-//All direction where player can move
+//all direction where player can move
 enum Direction
 {
 	Up,
@@ -19,7 +17,8 @@ enum Direction
 	Right
 };
 
-struct Vector2
+//simple x,y in one class
+class Vector2
 {
 private:
 	float x, y;
@@ -37,7 +36,7 @@ public:
 	//todo:
 	//operator overloading
 };
-struct Object
+class Object
 {
 protected:
 	Vector2 position = Vector2(0,0);
@@ -46,8 +45,7 @@ public:
 	virtual void movePosition(Vector2 newPosition) { position = newPosition; }
 	virtual Vector2 getPosition() { return position; }
 };
-
-struct SnakeBodyPart : public Object
+class SnakeBodyPart : public Object
 {
 public:
 	sf::RectangleShape shape;
@@ -80,8 +78,11 @@ public:
 		shape.setPosition(position.getX(), position.getY());
 	}
 };
-class Snake : public Object
+
+//static classes
+class Snake : Object
 {
+private:
 	std::vector<SnakeBodyPart> body;
 	Direction currentDirection;
 public:
@@ -90,67 +91,136 @@ public:
 		currentDirection = Up;
 		SnakeBodyPart head;
 		head.shape.setFillColor(sf::Color::Yellow);
-		head.movePosition(Vector2(CellSize*30, CellSize*15));
+		head.movePosition(Vector2(CellSize * 30, CellSize * 15));
 		body.push_back(head);
+		addNewBodyPart();
+		addNewBodyPart();
+		addNewBodyPart();
 	}
+
+	//getters
 	Vector2 getStep()
 	{
 		switch (currentDirection)
 		{
 		case Up:
-			return Vector2(0, CellSize);
-		case Down:
 			return Vector2(0, -CellSize);
+		case Down:
+			return Vector2(0, CellSize);
 		case Left:
 			return Vector2(-CellSize, 0);
 		case Right:
 			return Vector2(CellSize, 0);
 		}
 	}
+	Vector2 getPosition() { return body[0].getPosition(); }
+	Direction getDirection() { return currentDirection; }
 	int getSnakeLength() { return body.size(); }
+	//setters
+	void setDirection(Direction newDirection) { currentDirection = newDirection; }
+	//other
 	void movePosition(Vector2 newPosition)
 	{
 		//moving all body parts without 0
-		for (int i = getSnakeLength()-1; i > 0; i--)
-			body[i].setPosition(body[i-1].getPosition());
+		for (int i = getSnakeLength() - 1; i > 0; i--)
+			body[i].setPosition(body[i - 1].getPosition());
 
 		//moving snake "head"
 		body[0].movePosition(newPosition);
 	}
-	Vector2 getPosition() { return body[0].getPosition(); }
 	void addNewBodyPart()
 	{
 		SnakeBodyPart newBodyPart;
 		body.push_back(newBodyPart);
-		body[getSnakeLength()-1].movePosition(body[getSnakeLength()-2].getPosition());
+		body[getSnakeLength() - 1].movePosition(body[getSnakeLength() - 2].getPosition());
 	}
-	void drawSnakeBody(sf::RenderWindow * window) 
+	void drawSnakeBody(sf::RenderWindow& window)
 	{
 		for (size_t i = 0; i < getSnakeLength(); i++)
-			window->draw(body[i].shape);
+			window.draw(body[i].shape);
+	}
+};
+class GameController
+{
+private:
+	sf::RenderWindow* gameWindow;
+	Snake* snake;
+	int defaultFPS;
+	int currentFPS;
+
+public:
+	GameController(Snake& snake, sf::RenderWindow& gameWindow,int fps) 
+	{
+		this->snake = &snake;
+		defaultFPS = fps; 
+		this->gameWindow = &gameWindow;
+		setCurrentFPSToDefault();
+	}
+	void update()
+	{
+		gameWindow->clear();
+		snake->drawSnakeBody(*gameWindow);
+		snake->movePosition(snake->getStep());
+		gameWindow->display();
+	}
+
+	//getters
+	int getCurrentFPS() { return currentFPS; }
+	int getDefaultFPS() { return defaultFPS; }
+	//setters
+	void setGameWindow(sf::RenderWindow& newGameWindow) { gameWindow = &newGameWindow; }
+	void setCurrentFPS(int newFPS)
+	{
+		currentFPS = newFPS;
+		gameWindow->setFramerateLimit(currentFPS);
+	}
+	void setCurrentFPSToDefault()
+	{
+		currentFPS = defaultFPS;
+		gameWindow->setFramerateLimit(currentFPS);
+	}
+};
+class InputController
+{
+private:
+	Snake * snake;
+	sf::RenderWindow * gameWindow;
+public:
+	InputController(Snake &snake, sf::RenderWindow &gameWindow) 
+	{
+		this->snake = &snake; 
+		this->gameWindow = &gameWindow;
+	}
+	void update()
+	{
+		sf::Event event;
+		if (gameWindow->pollEvent(event))
+		{
+			if ((event.type == sf::Event::KeyPressed) & (event.key.code == sf::Keyboard::W))
+				snake->setDirection(Up);
+			if ((event.type == sf::Event::KeyPressed) & (event.key.code == sf::Keyboard::S))
+				snake->setDirection(Down);
+			if ((event.type == sf::Event::KeyPressed) & (event.key.code == sf::Keyboard::A))
+				snake->setDirection(Left);
+			if ((event.type == sf::Event::KeyPressed) & (event.key.code == sf::Keyboard::D))
+				snake->setDirection(Right);
+			if (event.type == sf::Event::Closed)
+				gameWindow->close();
+		}
 	}
 };
 
 int main()
-{
-	sf::RenderWindow window(sf::VideoMode(Width, Height), "Snake");//, Style::Fullscreen);
-	window.setFramerateLimit(3);
-	
+{	
+	sf::RenderWindow gameWindow(sf::VideoMode(Width, Height), "Snake");
 	Snake snake;
-	snake.addNewBodyPart();
-	snake.addNewBodyPart();
-	snake.addNewBodyPart();
-	std::cout << snake.getSnakeLength();
-
+	GameController gameController(snake, gameWindow, 10);
+	InputController inputController(snake, gameWindow);
 
 	while (true)
 	{
-		std::cout << "Snake step " << snake.getStep().getX() << " " << snake.getStep().getY() << std::endl;
-		std::cout << "Snake head position " << snake.getPosition().getX() << " " << snake.getPosition().getY() << std::endl;
-		window.clear();
-		snake.drawSnakeBody(&window);
-		snake.movePosition(snake.getStep());
-		window.display();
+		gameController.update();
+		inputController.update();
 	}
 
 	return 0;

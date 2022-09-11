@@ -1,4 +1,1 @@
-﻿  Source.cpp
-D:\VS PROJECTS\SnakeCPP\SNAKE\Source.cpp(110,23): warning C4267: return: преобразование из "size_t" в "int"; возможна потеря данных
-D:\VS PROJECTS\SnakeCPP\SNAKE\Source.cpp(109): warning C4715: Snake::getStep: значение возвращается не при всех путях выполнения
-  SNAKE.vcxproj -> D:\VS PROJECTS\SnakeCPP\x64\Debug\SNAKE.exe
+﻿  SNAKE.vcxproj -> D:\VS PROJECTS\SnakeCPP\x64\Debug\SNAKE.exe
