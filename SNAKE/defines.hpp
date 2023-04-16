@@ -1,0 +1,7 @@
+#define CELL_SIZE 20
+
+#define WIDTH_CELLS  60
+#define HEIGHT_CELLS 38
+
+#define WIDTH  (WIDTH_CELLS  * CELL_SIZE)
+#define HEIGHT (HEIGHT_CELLS * CELL_SIZE)

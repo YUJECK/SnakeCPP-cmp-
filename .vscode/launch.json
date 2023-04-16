@@ -1,0 +1,13 @@
+{
+    "configurations": [
+        {
+            "preLaunchTask": "build",
+            "type": "gdb",
+            "request": "launch",
+            "name": "Launch Program",
+            "target": "${workspaceRoot}/builddir/SNAKE/Snake",
+            "cwd": "${workspaceRoot}/SNAKE",
+            "valuesFormatting": "parseText"
+        }
+    ]
+}
